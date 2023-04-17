@@ -1,20 +1,8 @@
-// подключение express
 const express = require("express");
-const sequelize = require('./users.db')
-// создаем объект приложения
-const app = express();
-const PORT = process.env.PORT || 5000
+const app = express()
+const cors = require("cors")
 
-const start = async () => {
-  try {
-    sequelize.authenticate()
-    app.listen(PORT, () => console.log(PORT));
-  } catch (e) {
-    console.log(e)
-  }
-}
-start()
-
+app.use(cors())
 
 const sqlite3 = require('sqlite3').verbose()
 let sql;
@@ -24,18 +12,21 @@ const db = new sqlite3.Database('./users.db', sqlite3.OPEN_READWRITE, (err) => {
   if (err) return console.error(err.message);
 })
 
+app.listen(5000, () => {
+  console.log("yes")
+});
 
-// CREATE TABLE users (
-//   id INTEGER PRIMARY KEY AUTOINCREMENT,
-//   name VARCHAR(50),
-//   phone VARCHAR(50),
-//   number_var VARCHAR(50)
-// );
-
-// INSERT INTO users (name, phone, number_var)
-// VALUES ('Tom', '+79697776591', 'О 666 КВ. 178. rus');
-
-// SELECT * FROM users;
+// отдаем список
+app.get('/users', (async (req, res) => {
+  try {
+    const users = await db.all("SELECT * FROM users", function(err, rows) {
+      return rows
+    });
+    res.send(users)
+  } catch (e) {
+    res.status(500).send(`Something went wrong: ${e.message}\n`);
+  }
+}))
 
 
 
@@ -55,18 +46,18 @@ const db = new sqlite3.Database('./users.db', sqlite3.OPEN_READWRITE, (err) => {
 // })
 
 // update data
-sql = `UPDATE users SET name = ? WHERE id = ?`
-db.run(sql, ['Ваня', 1], (err) => {
-  if (err) return console.error(err.message);
-})
+// sql = `UPDATE users SET name = ? WHERE id = ?`
+// db.run(sql, ['Ваня', 1], (err) => {
+//   if (err) return console.error(err.message);
+// })
 
 // query the data
-sql = `SELECT * FROM users`;
-db.all(sql, [], (err, rows) => {
-  if (err) return console.error(err.message);
-    rows.forEach(row => {
-      console.log(row);
-    })
-})
+// sql = `SELECT * FROM users`;
+// db.all(sql, [], (err, rows) => {
+//   if (err) return console.error(err.message);
+//     rows.forEach(row => {
+//       console.log(row);
+//     })
+// })
 
 
