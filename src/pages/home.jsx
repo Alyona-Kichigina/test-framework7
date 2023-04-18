@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, {useCallback, useEffect, useState} from 'react';
 import {
   Page,
   List,
@@ -18,6 +18,14 @@ const HomePage = () => {
  //   })
  // }, [])
 
+  const click = useCallback(async () => {
+    console.log(666)
+    const {data} = await axios.post('http://localhost:5000/add-user',
+      {
+        name: "aaaa"
+      })
+  },[])
+
   const { isLoading, error, data } = useQuery(
     'repoData',
     () =>
@@ -29,6 +37,8 @@ const HomePage = () => {
   if (isLoading) return <p>Загрузка...</p>;
 
   if (error) return <p>Ошибка: {error.message}</p>;
+
+
 
   return (
     <Page name="home">
@@ -58,7 +68,7 @@ const HomePage = () => {
           value={numberCar}
           onChange={e => setNumberCar(e.target.value)}
         />
-        <Button type="button">Submit</Button>
+        <Button type="button" onClick={() => click()}>Submit</Button>
       </List>
     </Page>
     )

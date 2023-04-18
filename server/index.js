@@ -28,6 +28,17 @@ app.get('/users', (async (req, res) => {
   }
 }))
 
+// создаем парсер для данных application/x-www-form-urlencoded
+const urlencodedParser = express.urlencoded({extended: false});
+
+app.post('/add-user', urlencodedParser, (req, res) => {
+  if (!req.body) return res.sendStatus(400)
+  res.status(404).send("Sorry can't find that!")
+  res.send(
+    req.body
+  )
+})
+
 
 
 // sql = `CREATE TABLE users (
