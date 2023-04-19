@@ -12,6 +12,7 @@ import Framework7React from 'framework7-react';
 import '../css/framework7-custom.less';
 
 // Import Icons and App Custom Styles
+import 'react-phone-input-2/lib/style.css'
 import '../css/icons.css';
 import '../css/app.less';
 

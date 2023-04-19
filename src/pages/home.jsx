@@ -5,71 +5,91 @@ import {
   Button, ListInput
 } from 'framework7-react';
 import axios from "axios";
-import {useQuery} from 'react-query';
+import {useQuery, useMutation, useQueryClient} from 'react-query';
+import PhoneInput from 'react-phone-input-2'
+import {Loading} from "./style"
+
+const getUsers = async () => {
+  return (await axios.get('http://localhost:5000/users'))
+  .data;
+}
+
+const addUser = async (data) => {
+  await axios.post('http://localhost:5000/users', data)
+}
 
 const HomePage = () => {
+  const queryClient = useQueryClient();
   const [name, setName] = useState('')
   const [phone, setPhone] = useState('')
   const [numberCar, setNumberCar] = useState('')
 
- // useEffect(() => {
- //   axios.get('http://localhost:5000/users').then((response) => {
- //     console.log(response)
- //   })
- // }, [])
+  const {data, isLoading, error} = useQuery('users', getUsers)
 
-  const click = useCallback(async () => {
-    console.log(666)
-    const {data} = await axios.post('http://localhost:5000/add-user',
-      {
-        name: "aaaa"
-      })
-  },[])
+  const mutation = useMutation((newUser) => addUser(newUser), {
+    onSuccess: () => queryClient.invalidateQueries(["users"])
+  })
 
-  const { isLoading, error, data } = useQuery(
-    'repoData',
-    () =>
-      fetch(
-        'http://localhost:5000/users'
-      ).then((response) => response)
-  );
-
-  if (isLoading) return <p>Загрузка...</p>;
-
-  if (error) return <p>Ошибка: {error.message}</p>;
-
-
-
+  const onSubmit = useCallback(() => {
+    mutation.mutate({ name, phone, number_var: numberCar } )
+  }, [name, phone, numberCar])
   return (
     <Page name="home">
-      <List form onSubmit={(e)=>console.log(e)}>
-        <ListInput
-          label="ФИО"
-          type="text"
-          placeholder="Ваше ФИО"
-          required
-          validate
-          value={name}
-          onChange={e => setName(e.target.value)}
-         />
+      {
+        isLoading ? (
+          <Loading>Загрузка...</Loading>
+        )
+        : (
+          <>
+            {/*{*/}
+            {/*  mutation.isLoading && (<p>загрузка данных</p>)*/}
+            {/*}*/}
+            {/*{*/}
+            {/*  mutation.isError && (<p>{mutation.error.message}</p>)*/}
+            {/*}*/}
+            {/*{*/}
+            {/*  mutation.isSuccess && (<p>данные успешно добавлены</p>)*/}
+            {/*}*/}
+            <List form>
+              <ListInput
+                label="ФИО"
+                type="text"
+                placeholder="Ваше ФИО"
+                required
+                validate
+                value={name}
+                onChange={e => setName(e.target.value)}
+              />
 
-        <ListInput
-          validate
-          label="Номер телефона"
-          type="tel"
-          placeholder="Номер телефона"
-          value={phone}
-          onChange={e => setPhone(e.target.value)}
-        />
-        <ListInput
-          label="Номер автомобиля"
-          type="email"
-          placeholder="Номер автомобиля"
-          value={numberCar}
-          onChange={e => setNumberCar(e.target.value)}
-        />
-        <Button type="button" onClick={() => click()}>Submit</Button>
-      </List>
+              {/*<PhoneInput*/}
+              {/*  country={'ru'}*/}
+              {/*  value={phone}*/}
+              {/*  onChange={phone => setPhone( phone )}*/}
+              {/*/>*/}
+              <ListInput
+                validate
+                label="Номер телефона"
+                type="tel"
+                placeholder="Номер телефона"
+                value={phone}
+                onChange={e => setPhone(e.target.value)}
+              />
+              <ListInput
+                label="Номер автомобиля"
+                type="email"
+                placeholder="Номер автомобиля"
+                value={numberCar}
+                onChange={e => setNumberCar(e.target.value)}
+              />
+              <Button type="button" onClick={() => onSubmit()}>Submit</Button>
+            </List>
+
+            {data?.map(({name, phone, number_var, id}) => (
+              <div key={id}>{id}. {name}: {phone} - {number_var}</div>
+            ))}
+          </>
+        )
+      }
     </Page>
     )
 };

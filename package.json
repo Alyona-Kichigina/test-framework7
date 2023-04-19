@@ -27,8 +27,10 @@
     "prop-types": "^15.8.1",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
+    "react-phone-input-2": "^2.15.1",
     "react-query": "^3.39.3",
     "skeleton-elements": "^4.0.1",
+    "styled-components": "^5.3.9",
     "swiper": "^9.2.2"
   },
   "devDependencies": {

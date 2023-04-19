@@ -1,10 +1,13 @@
 const express = require("express");
 const app = express()
 const cors = require("cors")
+const bodyParser = require('body-parser');
+const sqlite3 = require('sqlite3').verbose()
+
+app.use(bodyParser.json())
 
 app.use(cors())
 
-const sqlite3 = require('sqlite3').verbose()
 let sql;
 
 // connect to db
@@ -13,29 +16,29 @@ const db = new sqlite3.Database('./users.db', sqlite3.OPEN_READWRITE, (err) => {
 })
 
 app.listen(5000, () => {
-  console.log("yes")
+  console.log("Сервер запущен")
 });
 
 // отдаем список
-app.get('/users', (async (req, res) => {
-  try {
-    const users = await db.all("SELECT * FROM users", function(err, rows) {
-      return rows
+app.get('/users', (req, res) => {
+    db.all("SELECT * FROM users", function(err, rows) {
+      if(err !== null) {
+        res.status(500).send(`Something went wrong: ${e.message}\n`);
+        return;
+      }
+      res.send(rows)
     });
-    res.send(users)
-  } catch (e) {
-    res.status(500).send(`Something went wrong: ${e.message}\n`);
-  }
-}))
+})
 
-// создаем парсер для данных application/x-www-form-urlencoded
-const urlencodedParser = express.urlencoded({extended: false});
-
-app.post('/add-user', urlencodedParser, (req, res) => {
+// добавляем данные
+app.post('/users', (req, res) => {
   if (!req.body) return res.sendStatus(400)
-  res.status(404).send("Sorry can't find that!")
-  res.send(
-    req.body
+  sql = `INSERT INTO users (name, phone, number_var) VALUES (?, ?, ?);`
+  db.run(sql, [req.body.name, req.body.phone, req.body.number_var], (err) => {
+    if (err) return console.error(err.message);
+  })
+  res.status(200).send(
+    "123"
   )
 })
 
